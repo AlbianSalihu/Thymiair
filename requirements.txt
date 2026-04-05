@@ -1,0 +1,4 @@
+tdmclient
+opencv-python
+numpy
+matplotlib
