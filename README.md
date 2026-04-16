@@ -110,9 +110,8 @@ python main.py
 
 ### Fix example: reproducibility note
 
-```md
 This project was developed for a fixed lab setup. Camera calibration, HSV thresholds, marker colors, and robot size assumptions are tuned to the original arena and may need adjustment for a new environment.
-```
+
 
 ## Known Limitations
 
