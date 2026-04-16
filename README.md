@@ -14,6 +14,8 @@ Vision-based autonomous navigation for a Thymio II robot — obstacle detection,
 
 The robot successfully navigated a cluttered arena from start to goal during the course demo, using only an overhead camera — no onboard sensors for localization. The full pipeline (vision → planning → EKF → motion control) ran end-to-end in real time.
 
+A key requirement was handling an **unexpected obstacle** placed mid-run: the robot detected it via proximity sensors, spun clear, and triggered a full replan — then continued to the goal.
+
 ---
 
 ## My Role
