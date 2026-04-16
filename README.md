@@ -1,6 +1,6 @@
 # ThymiAir
 
-Autonomous start-to-goal navigation for a Thymio II differential-drive robot using an overhead camera — built entirely from scratch in Python 3.
+Vision-based autonomous navigation for a Thymio II robot using obstacle detection, visibility-graph planning, and EKF-based state estimation.
 
 > EPFL MICRO-452 Mobile Robotics — Group 09, Fall 2022  
 > Team: **Albian Salihu**, Marin Bonnassies, Louis Gounot, Alexander Stephan
@@ -91,6 +91,8 @@ The global planner inflates obstacles by the robot radius, builds a visibility g
 
 ## Setup
 
+Developed for the original course environment; package versions may need adjustment on newer systems.
+
 **Requirements:** Python 3.8+, Thymio II with Thymio Device Manager running, overhead USB/IP camera.
 
 ```bash
@@ -106,6 +108,12 @@ python main.py
 
 ---
 
+### Fix example: reproducibility note
+
+```md
+This project was developed for a fixed lab setup. Camera calibration, HSV thresholds, marker colors, and robot size assumptions are tuned to the original arena and may need adjustment for a new environment.
+```
+
 ## Known Limitations
 
 - **Jerky motion** — the turn-then-go FSM performs a full stop-and-rotate before each straight segment; a smooth curvature controller would improve this significantly.
@@ -117,13 +125,6 @@ python main.py
 
 ## Portfolio note — what was restructured
 
-The original course submission was a Jupyter notebook (`Report.ipynb`) with the FSM main loop and control functions defined inline in notebook cells, and the global navigation split across four separate subfiles. For this portfolio repo, I restructured the codebase into importable Python modules while keeping every algorithm exactly as submitted:
-
-| File | What changed and why |
-|---|---|
-| `src/motion.py` + `src/main.py` | The notebook's inline async loop was separated into a reusable `motion.py` module and a standalone `main.py` entry point. The `vid` camera handle, which was a bare global in the original, is now passed explicitly as a parameter to `turn()` and `go_to_position()` — eliminating a hidden dependency. |
-| `src/navigation.py` | The four `GlobalNavigation/` subfiles (`GlobalNav.py`, `graph.py`, `djikstra.py`, `path.py`) were consolidated into a single module to remove the cross-file import chain and make the planning pipeline self-contained. |
-| `src/kalman.py` | `import numpy as np` was inside the function body in the original — moved to module level. |
-| All files | Docstrings and module-level headers added throughout. |
+This repository is a cleaned and modularized version of our original EPFL Mobile Robotics course project. The original submission was notebook-based; for this portfolio version, I reorganized the code into Python modules and improved readability without changing the core algorithms.
 
 **My primary contribution** was the navigation module (obstacle inflation, visibility graph, Dijkstra), with additional work across the vision pipeline, Kalman integration, and the overall system integration in the notebook.
