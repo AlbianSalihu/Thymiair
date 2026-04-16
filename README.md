@@ -34,9 +34,9 @@ The global planner inflates obstacles by the robot radius, builds a visibility g
                                 │                 │ Dijkstra → waypoints
                                 └────────┬────────┘
                  odometry                │
-               ──────────► ┌────────────▼────────┐
+                ──────────► ┌────────────▼────────┐
                             │   kalman.py         │ EKF predict + correct
-               ◄────────── │                     │ → x_est, P_est
+                ◄────────── │                     │ → x_est, P_est
                  camera     └────────┬────────────┘
                                      │
                             ┌────────▼────────┐
