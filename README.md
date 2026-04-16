@@ -1,21 +1,24 @@
 # ThymiAir
 
-Vision-based autonomous navigation for a Thymio II robot using obstacle detection, visibility-graph planning, and EKF-based state estimation.
+Vision-based autonomous navigation for a Thymio II robot — obstacle detection, visibility-graph path planning, and EKF state estimation, all running from a single overhead camera.
 
 > EPFL MICRO-452 Mobile Robotics — Group 09, Fall 2022  
 > Team: **Albian Salihu**, Marin Bonnassies, Louis Gounot, Alexander Stephan
 
+| Python | OpenCV | NumPy | tdmclient | EKF | Dijkstra |
+|--------|--------|-------|-----------|-----|----------|
+
 ---
- 
-## Demo
 
-The arena: blue rectangles are obstacles, the red triangle is the goal, and Thymio is identified by its two colored dots.
+## Result
 
-![Arena with detected markers](assets/vis.all_markers.png)
+The robot successfully navigated a cluttered arena from start to goal during the course demo, using only an overhead camera — no onboard sensors for localization. The full pipeline (vision → planning → EKF → motion control) ran end-to-end in real time.
 
-The global planner inflates obstacles by the robot radius, builds a visibility graph (red edges), and selects the shortest path (blue line) via Dijkstra:
+---
 
-![Planned path over visibility graph](assets/path.jpg)
+## My Role
+
+My primary contribution was the **navigation module**: obstacle inflation, visibility-graph construction, and Dijkstra shortest-path selection. I also contributed to the vision pipeline and the overall system integration.
 
 ---
 
@@ -49,8 +52,8 @@ The global planner inflates obstacles by the robot radius, builds a visibility g
 
 | File | Responsibility |
 |---|---|
-| `src/vision.py` | HSV colorspace pipeline (went through 15 iterations). Detects obstacles as 4-corner rectangles, goal as a triangle, and Thymio via two colored dots — heading derived from the big→small dot vector. |
-| `src/navigation.py` | Inflates each obstacle outward by `THYMIO_SIZE = 140 px` (robot radius). Builds a pixel-by-pixel line-of-sight visibility graph over all inflated corners, start, and goal. Runs Dijkstra for the shortest path. |
+| `src/vision.py` | HSV colorspace detection pipeline (15+ iterations to handle arena lighting). Detects obstacles as 4-corner rectangles, goal as a triangle, and Thymio via two colored dots — heading derived from the big→small dot vector. |
+| `src/navigation.py` | Inflates each obstacle outward by `THYMIO_SIZE = 140 px` (robot radius). Builds a line-of-sight visibility graph over all inflated corners, start, and goal. Runs Dijkstra for the shortest path. |
 | `src/kalman.py` | Extended Kalman Filter with a linearized unicycle motion model. Fuses wheel odometry (predict step) with overhead camera pose (correct step). Runs predict-only when the camera is occluded. |
 | `src/motion.py` | `turn()` and `go_to_position()` control functions, proximity-sensor reactive avoidance, async via `tdmclient`. |
 | `src/main.py` | Entry point: camera setup, Thymio connection, FSM loop. |
@@ -68,7 +71,9 @@ The global planner inflates obstacles by the robot radius, builds a visibility g
 
 ---
 
-## Vision pipeline
+## Vision Pipeline
+
+The detection pipeline went through 15+ iterations to handle real-world arena lighting conditions, color bleeding between markers, and varying camera angles.
 
 | Step | Image |
 |---|---|
@@ -79,7 +84,7 @@ The global planner inflates obstacles by the robot radius, builds a visibility g
 
 ---
 
-## Navigation pipeline
+## Navigation Pipeline
 
 | Step | Image |
 |---|---|
@@ -90,8 +95,6 @@ The global planner inflates obstacles by the robot radius, builds a visibility g
 ---
 
 ## Setup
-
-Developed for the original course environment; package versions may need adjustment on newer systems.
 
 **Requirements:** Python 3.8+, Thymio II with Thymio Device Manager running, overhead USB/IP camera.
 
@@ -106,24 +109,12 @@ python main.py
 
 `CAMERA_INDEX` in `main.py` defaults to `0` — change it if your overhead camera is not the primary device.
 
+> **Reproducibility note:** HSV thresholds, polygon size ranges, and robot size assumptions are tuned to the original course arena and lighting. They will need re-tuning for any different physical setup.
+
 ---
-
-### Fix example: reproducibility note
-
-This project was developed for a fixed lab setup. Camera calibration, HSV thresholds, marker colors, and robot size assumptions are tuned to the original arena and may need adjustment for a new environment.
-
 
 ## Known Limitations
 
 - **Jerky motion** — the turn-then-go FSM performs a full stop-and-rotate before each straight segment; a smooth curvature controller would improve this significantly.
-- **Empirically tuned thresholds** — HSV bounds, polygon size ranges, and proximity sensor trigger values were all calibrated to the specific demo arena, lighting, and colored markers used during the course. They will need re-tuning for any different setup.
 - **Pixel-space only** — all coordinates are in image pixels with no metric calibration, so absolute distances are approximate.
-- **Camera occlusion** — if the Thymio body blocks its own markers (e.g. during a tight turn near an obstacle), the EKF coasts on odometry alone until the markers reappear.
-
----
-
-## Portfolio note — what was restructured
-
-This repository is a cleaned and modularized version of our original EPFL Mobile Robotics course project. The original submission was notebook-based; for this portfolio version, I reorganized the code into Python modules and improved readability without changing the core algorithms.
-
-**My primary contribution** was the navigation module (obstacle inflation, visibility graph, Dijkstra), with additional work across the vision pipeline, Kalman integration, and the overall system integration in the notebook.
+- **Camera occlusion** — if the Thymio body blocks its own markers during a tight turn, the EKF coasts on odometry alone until the markers reappear.
